@@ -1,4 +1,4 @@
-import { desc, eq, asc } from "drizzle-orm";
+import { and, desc, eq, asc } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { notebookEntries, entrySteps, entryReagents } from "@/db/schema";
 import type { NotebookEntryInput } from "@/lib/schemas/notebook-entry";
@@ -13,9 +13,14 @@ export type NotebookEntry = {
   reagents: { name: string; amount: string }[];
 };
 
-export async function listEntries(): Promise<NotebookEntry[]> {
+// Entries are private to the scientist who dictated them — every read is
+// scoped to authorId, both the list and a direct lookup by id. Scoping only
+// the list and not the by-id lookup would still let someone view another
+// user's entry by pasting its URL.
+export async function listEntries(authorId: string): Promise<NotebookEntry[]> {
   const db = getDb();
   const rows = await db.query.notebookEntries.findMany({
+    where: eq(notebookEntries.authorId, authorId),
     orderBy: desc(notebookEntries.createdAt),
     with: {
       steps: { orderBy: asc(entrySteps.orderIndex) },
@@ -26,11 +31,15 @@ export async function listEntries(): Promise<NotebookEntry[]> {
 }
 
 export async function getEntryById(
-  id: string
+  id: string,
+  authorId: string
 ): Promise<NotebookEntry | null> {
   const db = getDb();
   const row = await db.query.notebookEntries.findFirst({
-    where: eq(notebookEntries.id, id),
+    where: and(
+      eq(notebookEntries.id, id),
+      eq(notebookEntries.authorId, authorId)
+    ),
     with: {
       steps: { orderBy: asc(entrySteps.orderIndex) },
       reagents: true,

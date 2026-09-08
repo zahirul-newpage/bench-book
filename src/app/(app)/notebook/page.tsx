@@ -2,14 +2,15 @@ import Link from "next/link";
 import { requireSession } from "@/lib/auth/authz";
 import { listEntries } from "@/lib/data/entries";
 
-// Shared across every bench and updated on every write (see createNotebookEntry) —
-// this must reflect the latest entries per request, not a build-time snapshot.
+// Entries are private per author and updated on every write (see
+// createNotebookEntry) — this must reflect the latest entries per request,
+// not a build-time snapshot.
 export const dynamic = "force-dynamic";
 
 export default async function NotebookPage() {
-  await requireSession("/notebook");
+  const session = await requireSession("/notebook");
 
-  const entries = await listEntries();
+  const entries = await listEntries(session.user.id);
 
   return (
     <div className="flex flex-col gap-6">

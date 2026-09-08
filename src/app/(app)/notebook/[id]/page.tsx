@@ -9,9 +9,9 @@ export default async function NotebookEntryPage(
   props: PageProps<"/notebook/[id]">
 ) {
   const { id } = await props.params;
-  await requireSession(`/notebook/${id}`);
+  const session = await requireSession(`/notebook/${id}`);
 
-  const entry = await getEntryById(id);
+  const entry = await getEntryById(id, session.user.id);
 
   if (!entry) notFound();
 
