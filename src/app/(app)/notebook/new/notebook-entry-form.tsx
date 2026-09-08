@@ -8,6 +8,7 @@ import {
   type NotebookEntryFormState,
 } from "./actions";
 import { RAW_TRANSCRIPT_MAX_LENGTH } from "@/lib/schemas/notebook-entry";
+import { VoiceRecorder } from "./voice-recorder";
 
 const initialState: NotebookEntryFormState = {};
 
@@ -67,6 +68,11 @@ export function NotebookEntryForm() {
           </label>
           <CharacterCount value={rawTranscript} />
         </div>
+        <VoiceRecorder
+          onTranscribed={(text) =>
+            setRawTranscript((prev) => (prev.trim() ? `${prev.trim()} ${text}` : text))
+          }
+        />
         <textarea
           id="rawTranscript"
           name="rawTranscript"
