@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const steps = [
   {
     label: "Dictate",
@@ -37,6 +39,12 @@ export default function Home() {
             >
               Example
             </a>
+            <Link
+              href="/notebook"
+              className="hover:text-zinc-900 dark:hover:text-zinc-50"
+            >
+              Sign in
+            </Link>
             <a
               href="#early-access"
               className="rounded-full bg-zinc-900 px-4 py-2 font-medium text-zinc-50 hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-300"
