@@ -40,7 +40,7 @@ export async function createNotebookEntry(
     };
   }
 
-  await createEntry(validatedFields.data);
+  await createEntry({ ...validatedFields.data, authorId: session.user.id });
   revalidatePath("/notebook");
   redirect("/notebook");
 }

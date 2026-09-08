@@ -19,12 +19,20 @@ export default async function LoginPage(props: PageProps<"/login">) {
         <div className="mt-6">
           <LoginForm redirectTo={from} />
         </div>
-        <Link
-          href="/"
-          className="mt-6 inline-flex items-center gap-1 text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-        >
-          ← Back to Bench Book
-        </Link>
+        <div className="mt-6 flex flex-col gap-2">
+          <Link
+            href="/register"
+            className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+          >
+            Don&rsquo;t have an account? Create one
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1 text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+          >
+            ← Back to Bench Book
+          </Link>
+        </div>
       </div>
     </div>
   );

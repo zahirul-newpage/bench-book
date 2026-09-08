@@ -17,8 +17,16 @@ export function assertAdmin(session: Session | null): void {
 }
 
 /**
- * Page guard: redirects to /login if signed out. Defense-in-depth alongside
- * proxy.ts — call at the top of every protected page, not just /admin.
+ * Page guard: redirects to /login if signed out. This is the PRIMARY gate —
+ * there is deliberately no proxy.ts. Under OpenNext's Cloudflare adapter, the
+ * proxy/middleware layer and the main request handler disagreed about the
+ * request's protocol (proxy saw HTTPS and looked for a `__Secure-`-prefixed
+ * session cookie; the real cookie, set over plain local HTTP, had no prefix),
+ * so a valid, freshly-issued session was rejected at the proxy every time —
+ * confirmed via the Set-Cookie headers on the wrongly-redirected response.
+ * Page-level guards call auth() directly in the same context that issued the
+ * cookie, so they don't hit this mismatch. Call this at the top of every
+ * protected page, not just /admin.
  */
 export async function requireSession(fromPath: string): Promise<Session> {
   const session = await auth();

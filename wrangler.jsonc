@@ -12,8 +12,23 @@
 		"enabled": true
 	},
 
+	// Not sensitive — plain vars, not secrets. AUTH_SECRET (the actual
+	// sensitive value) is set separately via `wrangler secret put`.
+	"vars": {
+		"AUTH_TRUST_HOST": "true"
+	},
+
 	// Workers AI binding — used by /api/transcribe for Whisper speech-to-text.
 	// wrangler dev proxies this to real Cloudflare inference via your
 	// `wrangler login` session, no API token needed.
-	"ai": { "binding": "AI" }
+	"ai": { "binding": "AI" },
+
+	// D1 — relational storage for users, notebook entries, and reagent stock.
+	"d1_databases": [
+		{
+			"binding": "bench_book_db",
+			"database_name": "bench-book-db",
+			"database_id": "aec5f506-54a1-4230-ae2f-34fa623e89ec"
+		}
+	]
 }
