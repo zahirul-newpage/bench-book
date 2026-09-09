@@ -10,7 +10,9 @@ export class AuthorizationError extends Error {
 }
 
 /** Server Action guard: throws so the action can return a typed error state. */
-export function assertAdmin(session: Session | null): void {
+export function assertAdmin(
+  session: Session | null
+): asserts session is Session {
   if (session?.user?.role !== "admin") {
     throw new AuthorizationError("Admin role required");
   }

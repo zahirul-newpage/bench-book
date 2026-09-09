@@ -1,0 +1,1 @@
+ALTER TABLE `entry_reagents` ADD `reagent_id` text REFERENCES reagents(id);

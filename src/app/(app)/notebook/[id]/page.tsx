@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireSession } from "@/lib/auth/authz";
 import { getEntryById } from "@/lib/data/entries";
+import { deleteNotebookEntry } from "./actions";
+import { DeleteEntryButton } from "./delete-entry-button";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +40,9 @@ export default async function NotebookEntryPage(
             {new Date(entry.createdAt).toLocaleString()}
           </time>
         </div>
+        <form action={deleteNotebookEntry.bind(null, entry.id)}>
+          <DeleteEntryButton />
+        </form>
       </div>
 
       <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
@@ -84,15 +89,25 @@ export default async function NotebookEntryPage(
             </p>
           ) : (
             <ul className="mt-3 flex flex-col gap-2">
-              {entry.reagents.map((reagent) => (
+              {entry.reagents.map((reagent, i) => (
                 <li
-                  key={reagent.name}
+                  key={`${reagent.name}-${i}`}
                   className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 text-sm dark:bg-zinc-900"
                 >
-                  <span className="text-zinc-700 dark:text-zinc-300">
+                  <span className="flex flex-wrap items-center gap-2 text-zinc-700 dark:text-zinc-300">
                     {reagent.name}
+                    {reagent.concentration ? (
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                        {reagent.concentration}
+                      </span>
+                    ) : null}
+                    {reagent.reagentId === null && (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                        not in inventory
+                      </span>
+                    )}
                   </span>
-                  <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                  <span className="flex-none font-medium text-zinc-900 dark:text-zinc-50">
                     {reagent.amount}
                   </span>
                 </li>
@@ -101,6 +116,35 @@ export default async function NotebookEntryPage(
           )}
         </div>
       </div>
+
+      {entry.preparations.length > 0 && (
+        <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Prepared this session
+          </h2>
+          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            Made at the bench, not drawn from stock — listed for
+            reproducibility, not for ordering.
+          </p>
+          <ul className="mt-3 flex flex-col gap-2">
+            {entry.preparations.map((prep, i) => (
+              <li
+                key={`${prep.name}-${i}`}
+                className="rounded-lg bg-zinc-50 px-3 py-2 text-sm dark:bg-zinc-900"
+              >
+                <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                  {prep.name}
+                </span>
+                {prep.detail ? (
+                  <span className="mt-0.5 block text-zinc-600 dark:text-zinc-400">
+                    {prep.detail}
+                  </span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

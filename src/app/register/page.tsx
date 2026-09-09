@@ -1,7 +1,15 @@
 import Link from "next/link";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { RegisterForm } from "./register-form";
 
-export default function RegisterPage() {
+// Reads the Turnstile sitekey from the Cloudflare env at request time — must
+// not be statically prerendered.
+export const dynamic = "force-dynamic";
+
+export default async function RegisterPage() {
+  const { env } = getCloudflareContext();
+  const sitekey = env.TURNSTILE_SITEKEY || null;
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
       <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-950">
@@ -12,7 +20,7 @@ export default function RegisterPage() {
           Choose Scientist for bench work, or Admin to manage reagent stock.
         </p>
         <div className="mt-6">
-          <RegisterForm />
+          <RegisterForm sitekey={sitekey} />
         </div>
         <Link
           href="/login"

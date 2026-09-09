@@ -32,6 +32,18 @@ export async function POST(request: Request) {
     );
   }
 
+  // Keyed by user, not IP — this costs real money per call regardless of who
+  // is asking, so the cap is per-account rather than per-network.
+  const { success: withinLimit } = await env.TRANSCRIBE_LIMITER.limit({
+    key: `transcribe:${session.user.id}`,
+  });
+  if (!withinLimit) {
+    return NextResponse.json(
+      { error: "Too many transcription requests. Try again in a minute." },
+      { status: 429 }
+    );
+  }
+
   const audioBytes = Array.from(new Uint8Array(audio));
 
   const result = await env.AI.run(WHISPER_MODEL, { audio: audioBytes });

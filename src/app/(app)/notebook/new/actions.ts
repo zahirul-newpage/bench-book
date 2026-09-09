@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { notebookEntrySchema } from "@/lib/schemas/notebook-entry";
 import { createEntry } from "@/lib/data/entries";
 import { auth } from "@/auth";
+import { auditLog } from "@/lib/audit";
 
 export type NotebookEntryFormState = {
   errors?: {
@@ -40,7 +41,17 @@ export async function createNotebookEntry(
     };
   }
 
-  await createEntry({ ...validatedFields.data, authorId: session.user.id });
+  const entry = await createEntry({
+    ...validatedFields.data,
+    authorId: session.user.id,
+  });
+  auditLog({
+    actor: session.user.id,
+    action: "notebook_entry.create",
+    target: entry.id,
+    outcome: "success",
+    details: { benchId: entry.benchId },
+  });
   revalidatePath("/notebook");
   redirect("/notebook");
 }
