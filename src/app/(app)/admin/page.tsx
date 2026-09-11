@@ -1,16 +1,22 @@
 import { requireAdmin } from "@/lib/auth/authz";
 import { listReagents } from "@/lib/data/reagents";
+import { listRecentStockDeductions } from "@/lib/data/stock-deduction-log";
 import { ReagentRow } from "./reagent-row";
 import { NewReagentForm } from "./reagent-form";
+import { StockDeductionLogSection } from "./stock-deduction-log";
 
-// Reagent stock changes on every save (see updateReagentStock) — must reflect
-// the latest values per request, not a build-time snapshot.
+// Reagent stock changes on every save (see updateReagentStock), and the
+// deduction queue writes new log rows continuously — must reflect the
+// latest values per request, not a build-time snapshot.
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   await requireAdmin("/admin");
 
-  const reagents = await listReagents();
+  const [reagents, deductions] = await Promise.all([
+    listReagents(),
+    listRecentStockDeductions(),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -38,6 +44,8 @@ export default async function AdminPage() {
         </h2>
         <NewReagentForm />
       </div>
+
+      <StockDeductionLogSection entries={deductions} />
     </div>
   );
 }
