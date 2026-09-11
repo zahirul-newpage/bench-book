@@ -28,6 +28,29 @@ function computeRms(analyser: AnalyserNode, buffer: Uint8Array<ArrayBuffer>) {
   return Math.sqrt(sumSquares / buffer.length);
 }
 
+// A real icon (not the 🎙 emoji, which renders inconsistently across
+// platforms/fonts) — same stroke style as the rest of the app's icons
+// (Logo, the notebook list's detail-view icon).
+function MicIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" />
+      <path d="M19 11a7 7 0 0 1-14 0" />
+      <path d="M12 18v3" />
+      <path d="M9 21h6" />
+    </svg>
+  );
+}
+
 export function VoiceRecorder({
   onTranscribed,
 }: {
@@ -194,14 +217,17 @@ export function VoiceRecorder({
   }
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1.5">
       {status === "listening" ? (
         <button
           type="button"
           onClick={stopDictation}
-          className="flex w-fit items-center gap-2 rounded-full border border-red-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100 dark:border-red-900 dark:bg-red-950 dark:text-red-300 dark:hover:bg-red-900"
+          className="flex w-fit items-center gap-2.5 rounded-full border-2 border-red-300 bg-red-50 px-5 py-3 text-sm font-semibold text-red-700 hover:bg-red-100 dark:border-red-800 dark:bg-red-950 dark:text-red-300 dark:hover:bg-red-900"
         >
-          <span className="h-2 w-2 animate-pulse rounded-full bg-red-600" />
+          <span className="relative flex h-3 w-3 flex-none">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+            <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600" />
+          </span>
           {pendingCount > 0
             ? "Listening… (transcribing)"
             : "Listening… click to stop"}
@@ -210,9 +236,10 @@ export function VoiceRecorder({
         <button
           type="button"
           onClick={startDictation}
-          className="flex w-fit items-center gap-2 rounded-full border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+          className="flex w-fit items-center gap-2.5 rounded-full bg-zinc-900 px-5 py-3 text-sm font-semibold text-zinc-50 shadow-sm hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-300"
         >
-          🎙 Dictate
+          <MicIcon className="h-5 w-5" />
+          Dictate
         </button>
       )}
       {error && (

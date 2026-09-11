@@ -19,19 +19,25 @@ export default async function InventoryPage() {
         </p>
       </div>
 
-      <ul className="flex flex-col gap-3">
-        {reagents.map((reagent) => (
-          <li
-            key={reagent.id}
-            className="flex items-center justify-between rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
-          >
-            <span className="font-medium">{reagent.name}</span>
-            <span className="text-sm text-zinc-600 dark:text-zinc-400">
-              {reagent.stock} {reagent.unit}
-            </span>
-          </li>
-        ))}
-      </ul>
+      {reagents.length === 0 ? (
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          No reagents in stock yet.
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-3">
+          {reagents.map((reagent) => (
+            <li
+              key={reagent.id}
+              className="flex items-center justify-between rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
+            >
+              <span className="font-medium">{reagent.name}</span>
+              <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                {reagent.stock} {reagent.unit}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

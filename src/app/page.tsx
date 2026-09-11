@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { auth, signOut } from "@/auth";
+import { Logo } from "@/components/logo";
 
 const steps = [
   {
@@ -24,12 +25,20 @@ export default async function Home() {
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
+      {/*
+        Same responsive shape as the app header ((app)/layout.tsx): the logo
+        gets its own full-width, centered row below `sm`, the nav wraps
+        instead of overflowing on a narrow phone, padding shrinks below
+        `sm`, and the email hides below the same `md` breakpoint the app
+        header uses — one consistent rule for "when does the email show,"
+        not two different ones per page.
+      */}
       <header className="sticky top-0 z-10 border-b border-zinc-200/80 bg-zinc-50/90 backdrop-blur dark:border-zinc-800/80 dark:bg-black/90">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <Link href="/" className="text-lg font-semibold tracking-tight">
-            Bench Book
-          </Link>
-          <nav className="flex items-center gap-6 text-sm text-zinc-600 dark:text-zinc-400">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-6 gap-y-3 px-4 py-4 sm:justify-between sm:px-6">
+          <div className="order-1 flex basis-full justify-center sm:order-none sm:basis-auto sm:justify-start">
+            <Logo href="/" />
+          </div>
+          <nav className="order-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-zinc-600 sm:order-none sm:justify-start sm:gap-x-6 dark:text-zinc-400">
             <a
               href="#how-it-works"
               className="hover:text-zinc-900 dark:hover:text-zinc-50"
@@ -57,7 +66,7 @@ export default async function Home() {
                     await signOut({ redirectTo: "/" });
                   }}
                 >
-                  <span className="hidden sm:inline">
+                  <span className="hidden md:inline">
                     {session.user.email}
                   </span>
                   <button
@@ -87,7 +96,7 @@ export default async function Home() {
       </header>
 
       <main className="flex flex-1 flex-col">
-        <section className="mx-auto flex w-full max-w-3xl flex-col items-center px-6 py-24 text-center sm:py-32">
+        <section className="mx-auto flex w-full max-w-3xl flex-col items-center px-4 py-24 text-center sm:px-6 sm:py-32">
           <p className="mb-4 text-sm font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
             For lab scientists, at the bench
           </p>
@@ -117,7 +126,7 @@ export default async function Home() {
 
         <section
           id="how-it-works"
-          className="border-t border-zinc-200/80 bg-white px-6 py-24 dark:border-zinc-800/80 dark:bg-zinc-950"
+          className="border-t border-zinc-200/80 bg-white px-4 py-24 sm:px-6 dark:border-zinc-800/80 dark:bg-zinc-950"
         >
           <div className="mx-auto max-w-5xl">
             <h2 className="text-center text-3xl font-semibold tracking-tight">
@@ -144,7 +153,7 @@ export default async function Home() {
 
         <section
           id="example"
-          className="border-t border-zinc-200/80 px-6 py-24 dark:border-zinc-800/80"
+          className="border-t border-zinc-200/80 px-4 py-24 sm:px-6 dark:border-zinc-800/80"
         >
           <div className="mx-auto max-w-5xl">
             <h2 className="text-center text-3xl font-semibold tracking-tight">
@@ -184,7 +193,7 @@ export default async function Home() {
 
         <section
           id="early-access"
-          className="border-t border-zinc-200/80 bg-white px-6 py-24 dark:border-zinc-800/80 dark:bg-zinc-950"
+          className="border-t border-zinc-200/80 bg-white px-4 py-24 sm:px-6 dark:border-zinc-800/80 dark:bg-zinc-950"
         >
           <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
             <h2 className="text-3xl font-semibold tracking-tight">
@@ -204,8 +213,8 @@ export default async function Home() {
         </section>
       </main>
 
-      <footer className="border-t border-zinc-200/80 px-6 py-8 dark:border-zinc-800/80">
-        <div className="mx-auto flex max-w-5xl items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+      <footer className="border-t border-zinc-200/80 px-4 py-8 sm:px-6 dark:border-zinc-800/80">
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-1 text-center text-xs text-zinc-500 sm:flex-row sm:justify-between sm:text-left dark:text-zinc-400">
           <span>&copy; {new Date().getFullYear()} Bench Book</span>
           <span>Built for scientists, at the bench.</span>
         </div>

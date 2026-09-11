@@ -18,8 +18,20 @@ export default async function NotebookPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Notebook</h1>
         <Link
           href="/notebook/new"
-          className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-50 hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-300"
+          className="flex items-center gap-1.5 rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-50 hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-300"
         >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-4 w-4"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
           New entry
         </Link>
       </div>
@@ -63,7 +75,10 @@ export default async function NotebookPage() {
                   </Link>
                 </div>
               </div>
-              <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-zinc-700 dark:text-zinc-300">
+              {/* Truncated to 3 lines here — the full text (plus structured
+                  steps/reagents) is what the detail page behind the eye
+                  icon above is for, not this list. */}
+              <p className="mt-3 line-clamp-3 text-sm leading-6 text-zinc-700 dark:text-zinc-300">
                 {entry.rawTranscript}
               </p>
             </li>

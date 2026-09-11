@@ -43,6 +43,14 @@ export type NotebookEntry = {
   preparations: { name: string; detail: string }[];
 };
 
+// Shared by both reads below so the relation set can't quietly drift between
+// the list view and the single-entry view.
+const ENTRY_RELATIONS = {
+  steps: { orderBy: asc(entrySteps.orderIndex) },
+  reagents: true,
+  preparations: true,
+} as const;
+
 // Entries are private to the scientist who dictated them — every read is
 // scoped to authorId, both the list and a direct lookup by id. Scoping only
 // the list and not the by-id lookup would still let someone view another
@@ -52,11 +60,7 @@ export async function listEntries(authorId: string): Promise<NotebookEntry[]> {
   const rows = await db.query.notebookEntries.findMany({
     where: eq(notebookEntries.authorId, authorId),
     orderBy: desc(notebookEntries.createdAt),
-    with: {
-      steps: { orderBy: asc(entrySteps.orderIndex) },
-      reagents: true,
-      preparations: true,
-    },
+    with: ENTRY_RELATIONS,
   });
   return rows.map(toNotebookEntry);
 }
@@ -71,11 +75,7 @@ export async function getEntryById(
       eq(notebookEntries.id, id),
       eq(notebookEntries.authorId, authorId)
     ),
-    with: {
-      steps: { orderBy: asc(entrySteps.orderIndex) },
-      reagents: true,
-      preparations: true,
-    },
+    with: ENTRY_RELATIONS,
   });
   return row ? toNotebookEntry(row) : null;
 }
