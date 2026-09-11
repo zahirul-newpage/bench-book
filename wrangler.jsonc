@@ -30,5 +30,41 @@
 			"database_name": "bench-book-db",
 			"database_id": "aec5f506-54a1-4230-ae2f-34fa623e89ec"
 		}
-	]
+	],
+
+	// KV — hot, read-many cache for the shared reagent list (read by every
+	// bench on /inventory and /admin, written rarely). Eventually consistent
+	// and rebuildable from D1 at any time — never the source of truth.
+	"kv_namespaces": [
+		{
+			"binding": "bench_book_cache",
+			"id": "7603b18144bc4a8b8b20f352deb2abee"
+		}
+	],
+
+	// Rate limits — cheap reject path before any DB/AI work. Keyed by IP for
+	// the unauthenticated endpoints (register/login are pre-auth by nature);
+	// transcribe is authenticated, so it's keyed by user id instead.
+	"unsafe": {
+		"bindings": [
+			{
+				"name": "REGISTER_LIMITER",
+				"type": "ratelimit",
+				"namespace_id": "1001",
+				"simple": { "limit": 3, "period": 60 }
+			},
+			{
+				"name": "LOGIN_LIMITER",
+				"type": "ratelimit",
+				"namespace_id": "1002",
+				"simple": { "limit": 5, "period": 60 }
+			},
+			{
+				"name": "TRANSCRIBE_LIMITER",
+				"type": "ratelimit",
+				"namespace_id": "1003",
+				"simple": { "limit": 10, "period": 60 }
+			}
+		]
+	}
 }

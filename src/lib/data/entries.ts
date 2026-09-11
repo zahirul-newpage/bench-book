@@ -1,8 +1,14 @@
 import { and, desc, eq, asc } from "drizzle-orm";
 import { getDb } from "@/db/client";
-import { notebookEntries, entrySteps, entryReagents } from "@/db/schema";
+import {
+  notebookEntries,
+  entrySteps,
+  entryReagents,
+  entryPreparations,
+} from "@/db/schema";
 import type { NotebookEntryInput } from "@/lib/schemas/notebook-entry";
 import { structureTranscript } from "@/lib/structuring";
+import { listReagents } from "@/lib/data/reagents";
 
 export type NotebookEntry = {
   id: string;
@@ -10,7 +16,13 @@ export type NotebookEntry = {
   rawTranscript: string;
   createdAt: string;
   steps: { order: number; text: string }[];
-  reagents: { name: string; amount: string }[];
+  reagents: {
+    name: string;
+    amount: string;
+    concentration: string | null;
+    reagentId: string | null;
+  }[];
+  preparations: { name: string; detail: string }[];
 };
 
 // Entries are private to the scientist who dictated them — every read is
@@ -25,6 +37,7 @@ export async function listEntries(authorId: string): Promise<NotebookEntry[]> {
     with: {
       steps: { orderBy: asc(entrySteps.orderIndex) },
       reagents: true,
+      preparations: true,
     },
   });
   return rows.map(toNotebookEntry);
@@ -43,6 +56,7 @@ export async function getEntryById(
     with: {
       steps: { orderBy: asc(entrySteps.orderIndex) },
       reagents: true,
+      preparations: true,
     },
   });
   return row ? toNotebookEntry(row) : null;
@@ -51,13 +65,18 @@ export async function getEntryById(
 export async function createEntry(
   input: NotebookEntryInput & { authorId: string }
 ): Promise<NotebookEntry> {
-  const { steps, reagents } = structureTranscript(input.rawTranscript);
+  const knownReagents = await listReagents();
+  const { steps, reagents, preparations } = await structureTranscript(
+    input.rawTranscript,
+    knownReagents
+  );
   const db = getDb();
 
   const id = crypto.randomUUID();
   const createdAt = new Date().toISOString();
 
-  // One batched round trip (entry + all steps + all reagents) instead of
+  // One batched round trip (entry + all steps + reagents + preparations)
+  // instead of
   // separate awaited inserts — keeps this under D1's per-statement overhead
   // and avoids partial writes if the write fails partway through.
   const statements = [
@@ -82,6 +101,16 @@ export async function createEntry(
         entryId: id,
         name: reagent.name,
         amount: reagent.amount,
+        concentration: reagent.concentration,
+        reagentId: reagent.reagentId,
+      })
+    ),
+    ...preparations.map((prep) =>
+      db.insert(entryPreparations).values({
+        id: crypto.randomUUID(),
+        entryId: id,
+        name: prep.name,
+        detail: prep.detail,
       })
     ),
   ] as const;
@@ -94,7 +123,15 @@ export async function createEntry(
     await statements[0];
   }
 
-  return { id, benchId: input.benchId, rawTranscript: input.rawTranscript, createdAt, steps, reagents };
+  return {
+    id,
+    benchId: input.benchId,
+    rawTranscript: input.rawTranscript,
+    createdAt,
+    steps,
+    reagents,
+    preparations,
+  };
 }
 
 function toNotebookEntry(row: {
@@ -103,7 +140,13 @@ function toNotebookEntry(row: {
   rawTranscript: string;
   createdAt: string;
   steps: { orderIndex: number; text: string }[];
-  reagents: { name: string; amount: string }[];
+  reagents: {
+    name: string;
+    amount: string;
+    concentration: string | null;
+    reagentId: string | null;
+  }[];
+  preparations: { name: string; detail: string }[];
 }): NotebookEntry {
   return {
     id: row.id,
@@ -112,5 +155,21 @@ function toNotebookEntry(row: {
     createdAt: row.createdAt,
     steps: row.steps.map((s) => ({ order: s.orderIndex, text: s.text })),
     reagents: row.reagents,
+    preparations: row.preparations,
   };
+}
+
+// Ownership-scoped delete — mirrors getEntryById's authorId check so a
+// scientist can only delete their own entries. entry_steps and
+// entry_reagents/entry_preparations cascade via the FK's onDelete: "cascade".
+export async function deleteEntry(
+  id: string,
+  authorId: string
+): Promise<boolean> {
+  const db = getDb();
+  const deleted = await db
+    .delete(notebookEntries)
+    .where(and(eq(notebookEntries.id, id), eq(notebookEntries.authorId, authorId)))
+    .returning({ id: notebookEntries.id });
+  return deleted.length > 0;
 }

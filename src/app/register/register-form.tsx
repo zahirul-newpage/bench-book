@@ -2,11 +2,12 @@
 
 import { useActionState } from "react";
 import { SubmitButton } from "@/components/submit-button";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 import { registerUser, type RegisterFormState } from "./actions";
 
 const initialState: RegisterFormState = {};
 
-export function RegisterForm() {
+export function RegisterForm({ sitekey }: { sitekey: string | null }) {
   const [state, formAction] = useActionState(registerUser, initialState);
 
   return (
@@ -69,6 +70,8 @@ export function RegisterForm() {
           </p>
         ))}
       </div>
+
+      <TurnstileWidget sitekey={sitekey} />
 
       {state.message && !state.errors && (
         <p className="text-sm text-zinc-600 dark:text-zinc-400">

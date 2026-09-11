@@ -1,0 +1,1 @@
+ALTER TABLE `reagents` ADD `aliases` text;

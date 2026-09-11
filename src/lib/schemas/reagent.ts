@@ -16,6 +16,14 @@ export const newReagentSchema = z.object({
     .trim()
     .min(1, "Unit is required")
     .max(20, "Unit must be 20 characters or fewer"),
+  // Optional comma-separated synonyms an admin confirms mean the same stock
+  // item, e.g. "sodium chloride, table salt" for NaCl. Used to match
+  // dictated reagent names; see db/schema.ts for why these are curated.
+  aliases: z
+    .string()
+    .trim()
+    .max(200, "Aliases must be 200 characters or fewer")
+    .optional(),
   stock: stockSchema,
 });
 

@@ -8,6 +8,27 @@
       "when": 1788879083373,
       "tag": "0000_harsh_wasp",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788961549644,
+      "tag": "0001_broad_wolfpack",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1788967692472,
+      "tag": "0002_noisy_arachne",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1788969449965,
+      "tag": "0003_harsh_lady_bullseye",
+      "breakpoints": true
     }
   ]
 }
