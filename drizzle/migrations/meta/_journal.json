@@ -29,6 +29,20 @@
       "when": 1788969449965,
       "tag": "0003_harsh_lady_bullseye",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1789020170579,
+      "tag": "0004_faithful_synch",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1789034064608,
+      "tag": "0005_stock_deduction_status",
+      "breakpoints": true
     }
   ]
 }

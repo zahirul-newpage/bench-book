@@ -27,10 +27,16 @@ export const newReagentSchema = z.object({
   stock: stockSchema,
 });
 
-export const reagentStockSchema = z.object({
+// Aliases here reuses newReagentSchema's field so both forms agree on limits.
+export const reagentUpdateSchema = z.object({
   reagentId: z.string().trim().min(1, "Reagent is required"),
   stock: stockSchema,
+  aliases: z
+    .string()
+    .trim()
+    .max(200, "Aliases must be 200 characters or fewer")
+    .optional(),
 });
 
 export type NewReagentInput = z.infer<typeof newReagentSchema>;
-export type ReagentStockInput = z.infer<typeof reagentStockSchema>;
+export type ReagentUpdateInput = z.infer<typeof reagentUpdateSchema>;

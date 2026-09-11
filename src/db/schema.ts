@@ -76,6 +76,41 @@ export const entryPreparations = sqliteTable("entry_preparations", {
   detail: text("detail").notNull(),
 });
 
+// One row per stock-deduction TASK, one per dictated reagent that matched
+// inventory — created "queued" the moment createEntry enqueues it, and
+// updated in place as the queue consumer works through it (see
+// src/lib/queue/stock-deduction-consumer.ts). This is what makes queue
+// activity visible on /admin as a live lifecycle, not only in
+// `wrangler tail`/the observability API.
+//
+// The row's id is the SAME id carried in the queue message body — the
+// producer (entries.ts) and consumer update the same row rather than the
+// consumer inserting a fresh one, which is what makes "queued"/"in_progress"
+// observable at all (a row that only appeared once processing finished
+// could never show an in-flight state).
+//
+// Deliberately NOT foreign-keyed to notebook_entries or reagents: it's a
+// durable history log, and must still show what happened even after the
+// entry is deleted (scientists can delete their own entries) or,
+// hypothetically, a reagent is removed. reagentName is denormalized for the
+// same reason — readable without a join that could go missing.
+export const stockDeductionLog = sqliteTable("stock_deduction_log", {
+  id: text("id").primaryKey(),
+  entryId: text("entry_id").notNull(),
+  reagentId: text("reagent_id").notNull(),
+  reagentName: text("reagent_name").notNull(),
+  amount: real("amount").notNull(),
+  status: text("status", {
+    enum: ["queued", "in_progress", "success", "failed"],
+  }).notNull(),
+  // Set on the failing attempt; left in place across a retry back to
+  // "queued" so an admin can see why the last attempt failed even while
+  // it's still pending redelivery, not just once it's terminally "failed".
+  errorMessage: text("error_message"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
 export const notebookEntriesRelations = relations(
   notebookEntries,
   ({ many, one }) => ({

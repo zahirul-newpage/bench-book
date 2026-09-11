@@ -4,21 +4,22 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { assertAdmin, AuthorizationError } from "@/lib/auth/authz";
-import { reagentStockSchema, newReagentSchema } from "@/lib/schemas/reagent";
-import { setReagentStock, createReagent } from "@/lib/data/reagents";
+import { reagentUpdateSchema, newReagentSchema } from "@/lib/schemas/reagent";
+import { updateReagent, createReagent } from "@/lib/data/reagents";
 import { auditLog } from "@/lib/audit";
 
-export type ReagentStockFormState = {
+export type ReagentUpdateFormState = {
   errors?: {
     stock?: string[];
+    aliases?: string[];
   };
   message?: string;
 };
 
 export async function updateReagentStock(
-  _prevState: ReagentStockFormState | undefined,
+  _prevState: ReagentUpdateFormState | undefined,
   formData: FormData
-): Promise<ReagentStockFormState> {
+): Promise<ReagentUpdateFormState> {
   const session = await auth();
   try {
     assertAdmin(session);
@@ -26,37 +27,41 @@ export async function updateReagentStock(
     if (error instanceof AuthorizationError) {
       auditLog({
         actor: session?.user?.id ?? "anonymous",
-        action: "reagent.stock_update",
+        action: "reagent.update",
         outcome: "failure",
         details: { reason: "not_admin" },
       });
-      return { message: "You must be an admin to update stock." };
+      return { message: "You must be an admin to update this reagent." };
     }
     throw error;
   }
 
-  const validatedFields = reagentStockSchema.safeParse({
+  const validatedFields = reagentUpdateSchema.safeParse({
     reagentId: formData.get("reagentId"),
     stock: formData.get("stock"),
+    aliases: formData.get("aliases") ?? undefined,
   });
 
   if (!validatedFields.success) {
     const tree = z.treeifyError(validatedFields.error);
     return {
-      errors: { stock: tree.properties?.stock?.errors },
+      errors: {
+        stock: tree.properties?.stock?.errors,
+        aliases: tree.properties?.aliases?.errors,
+      },
       message: "Please fix the errors below.",
     };
   }
 
-  const updated = await setReagentStock(
-    validatedFields.data.reagentId,
-    validatedFields.data.stock
-  );
+  const updated = await updateReagent(validatedFields.data.reagentId, {
+    stock: validatedFields.data.stock,
+    aliases: validatedFields.data.aliases?.trim() || null,
+  });
 
   if (!updated) {
     auditLog({
       actor: session.user.id,
-      action: "reagent.stock_update",
+      action: "reagent.update",
       target: validatedFields.data.reagentId,
       outcome: "failure",
       details: { reason: "not_found" },
@@ -66,15 +71,15 @@ export async function updateReagentStock(
 
   auditLog({
     actor: session.user.id,
-    action: "reagent.stock_update",
+    action: "reagent.update",
     target: updated.id,
     outcome: "success",
-    details: { newStock: updated.stock },
+    details: { newStock: updated.stock, aliases: updated.aliases },
   });
 
   revalidatePath("/admin");
   revalidatePath("/inventory");
-  return { message: "Stock updated." };
+  return { message: "Saved." };
 }
 
 export type NewReagentFormState = {

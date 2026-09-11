@@ -1,6 +1,8 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"main": ".open-next/worker.js",
+	// worker-entry.ts wraps OpenNext's generated .open-next/worker.js to add
+	// a `queue` handler (the stock-deduction consumer) — see that file.
+	"main": "worker-entry.ts",
 	"name": "eln-app",
 	"compatibility_date": "2026-05-12",
 	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -41,6 +43,30 @@
 			"id": "7603b18144bc4a8b8b20f352deb2abee"
 		}
 	],
+
+	// Stock deduction queue — createEntry enqueues one message per
+	// dictated-reagent that matched inventory instead of deducting stock
+	// inline. The consumer (worker-entry.ts) does the actual subtraction.
+	// Decouples the entry save (must feel instant to the scientist) from
+	// inventory bookkeeping (fine to trail by a few seconds), at the cost of
+	// the two no longer succeeding/failing atomically together — see
+	// worker-entry.ts for how a permanently-failing deduction is handled.
+	"queues": {
+		"producers": [
+			{
+				"queue": "bench-book-stock-deductions",
+				"binding": "STOCK_DEDUCTION_QUEUE"
+			}
+		],
+		"consumers": [
+			{
+				"queue": "bench-book-stock-deductions",
+				"max_batch_size": 10,
+				"max_batch_timeout": 5,
+				"max_retries": 3
+			}
+		]
+	},
 
 	// Rate limits — cheap reject path before any DB/AI work. Keyed by IP for
 	// the unauthenticated endpoints (register/login are pre-auth by nature);
