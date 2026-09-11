@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { auth, signOut } from "@/auth";
+
 const steps = [
   {
     label: "Dictate",
@@ -16,14 +19,16 @@ const steps = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
       <header className="sticky top-0 z-10 border-b border-zinc-200/80 bg-zinc-50/90 backdrop-blur dark:border-zinc-800/80 dark:bg-black/90">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <span className="text-lg font-semibold tracking-tight">
+          <Link href="/" className="text-lg font-semibold tracking-tight">
             Bench Book
-          </span>
+          </Link>
           <nav className="flex items-center gap-6 text-sm text-zinc-600 dark:text-zinc-400">
             <a
               href="#how-it-works"
@@ -37,6 +42,40 @@ export default function Home() {
             >
               Example
             </a>
+            {session?.user?.email ? (
+              <>
+                <Link
+                  href="/notebook"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50"
+                >
+                  Notebook
+                </Link>
+                <form
+                  className="flex items-center gap-3"
+                  action={async () => {
+                    "use server";
+                    await signOut({ redirectTo: "/" });
+                  }}
+                >
+                  <span className="hidden sm:inline">
+                    {session.user.email}
+                  </span>
+                  <button
+                    type="submit"
+                    className="hover:text-zinc-900 dark:hover:text-zinc-50"
+                  >
+                    Sign out
+                  </button>
+                </form>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className="hover:text-zinc-900 dark:hover:text-zinc-50"
+              >
+                Sign in
+              </Link>
+            )}
             <a
               href="#early-access"
               className="rounded-full bg-zinc-900 px-4 py-2 font-medium text-zinc-50 hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-300"
