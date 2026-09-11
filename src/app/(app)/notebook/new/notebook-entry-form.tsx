@@ -9,6 +9,7 @@ import {
 } from "./actions";
 import { RAW_TRANSCRIPT_MAX_LENGTH } from "@/lib/schemas/notebook-entry";
 import { VoiceRecorder } from "./voice-recorder";
+import { SavingProgress } from "./saving-progress";
 
 const initialState: NotebookEntryFormState = {};
 
@@ -33,7 +34,11 @@ function CharacterCount({ value }: { value: string }) {
   );
 }
 
-export function NotebookEntryForm() {
+export function NotebookEntryForm({
+  defaultBenchId,
+}: {
+  defaultBenchId: string;
+}) {
   const [state, formAction] = useActionState(
     createNotebookEntry,
     initialState
@@ -41,18 +46,36 @@ export function NotebookEntryForm() {
   const [rawTranscript, setRawTranscript] = useState("");
 
   return (
-    <form action={formAction} className="flex flex-col gap-6">
+    <form
+      action={formAction}
+      className="flex flex-col gap-6 rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950"
+    >
+      {/*
+        Bench ID is metadata about the entry, not the entry itself — kept
+        visually quieter (smaller label, no border-emphasis) than the
+        dictation section below, which is what this whole page is actually
+        for. Before this, both fields carried equal visual weight despite
+        one being a one-time default most people never touch.
+      */}
       <div className="flex flex-col gap-2">
-        <label htmlFor="benchId" className="text-sm font-medium">
-          Bench ID
-        </label>
+        <div className="flex items-center justify-between">
+          <label
+            htmlFor="benchId"
+            className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400"
+          >
+            Bench ID
+          </label>
+          <span className="text-xs text-zinc-400 dark:text-zinc-500">
+            Auto-filled — edit if you&rsquo;d like to name it yourself
+          </span>
+        </div>
         <input
           id="benchId"
           name="benchId"
           type="text"
           required
-          placeholder="Bench 3"
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
+          defaultValue={defaultBenchId}
+          className="rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
         />
         {state.errors?.benchId?.map((error) => (
           <p key={error} className="text-sm text-red-600 dark:text-red-400">
@@ -61,7 +84,9 @@ export function NotebookEntryForm() {
         ))}
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="border-t border-zinc-100 dark:border-zinc-900" />
+
+      <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <label htmlFor="rawTranscript" className="text-sm font-medium">
             Dictated entry
@@ -97,8 +122,11 @@ export function NotebookEntryForm() {
         </p>
       )}
 
-      <div>
-        <SubmitButton pendingChildren="Saving…">Save entry</SubmitButton>
+      <div className="flex flex-col gap-3">
+        <div>
+          <SubmitButton pendingChildren="Saving…">Save entry</SubmitButton>
+        </div>
+        <SavingProgress />
       </div>
     </form>
   );

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 import { LoginForm } from "./login-form";
 
 export default async function LoginPage(props: PageProps<"/login">) {
@@ -7,15 +8,15 @@ export default async function LoginPage(props: PageProps<"/login">) {
     typeof searchParams.from === "string" ? searchParams.from : "/notebook";
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-4 sm:px-6 dark:bg-black">
+      <div className="mb-8">
+        <Logo href="/" />
+      </div>
       <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-950">
-        <h1 className="text-xl font-semibold tracking-tight">
-          Sign in to Bench Book
+        <h1 className="text-center text-xl font-semibold tracking-tight">
+          Sign in
         </h1>
-        <div className="mt-1 flex flex-col gap-0.5 text-sm text-zinc-600 dark:text-zinc-400">
-          <p>Demo scientist: scientist@benchbook.app / bench-book-demo</p>
-          <p>Demo admin: admin@benchbook.app / bench-book-admin</p>
-        </div>
+
         <div className="mt-6">
           <LoginForm redirectTo={from} />
         </div>

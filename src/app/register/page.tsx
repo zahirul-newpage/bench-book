@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { Logo } from "@/components/logo";
 import { RegisterForm } from "./register-form";
 
 // Reads the Turnstile sitekey from the Cloudflare env at request time — must
@@ -11,7 +12,10 @@ export default async function RegisterPage() {
   const sitekey = env.TURNSTILE_SITEKEY || null;
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-4 sm:px-6 dark:bg-black">
+      <div className="mb-8">
+        <Logo href="/" />
+      </div>
       <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-950">
         <h1 className="text-xl font-semibold tracking-tight">
           Create a Bench Book account

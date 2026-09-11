@@ -41,8 +41,12 @@ export function RegisterForm({ sitekey }: { sitekey: string | null }) {
           type="password"
           required
           minLength={8}
+          aria-describedby="password-hint"
           className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
         />
+        <p id="password-hint" className="text-xs text-zinc-500 dark:text-zinc-500">
+          At least 8 characters.
+        </p>
         {state.errors?.password?.map((error) => (
           <p key={error} className="text-sm text-red-600 dark:text-red-400">
             {error}

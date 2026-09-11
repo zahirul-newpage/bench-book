@@ -29,14 +29,20 @@ export default async function AdminPage() {
         </p>
       </div>
 
-      <ul className="flex flex-col gap-3">
-        {reagents.map((reagent) => (
-          <ReagentRow
-            key={`${reagent.id}:${reagent.stock}`}
-            reagent={reagent}
-          />
-        ))}
-      </ul>
+      {reagents.length === 0 ? (
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          No reagents yet — add the first one below.
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-3">
+          {reagents.map((reagent) => (
+            <ReagentRow
+              key={`${reagent.id}:${reagent.stock}`}
+              reagent={reagent}
+            />
+          ))}
+        </ul>
+      )}
 
       <div>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">

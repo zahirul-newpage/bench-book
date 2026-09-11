@@ -44,14 +44,6 @@ export async function listReagents(): Promise<Reagent[]> {
   return rows;
 }
 
-export async function getReagentById(id: string): Promise<Reagent | null> {
-  const db = getDb();
-  const row = await db.query.reagents.findFirst({
-    where: eq(reagents.id, id),
-  });
-  return row ?? null;
-}
-
 async function invalidateReagentsCache(): Promise<void> {
   const { env } = getCloudflareContext();
   await env.bench_book_cache.delete(REAGENTS_CACHE_KEY).catch(() => {});
