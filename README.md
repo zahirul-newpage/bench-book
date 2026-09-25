@@ -110,15 +110,29 @@ which incurs small real usage charges. There's no offline/mocked mode.
 
 ### Environment
 
-`.env.local` (gitignored):
+Two separate files, because they feed two separate things — `.env.local`
+feeds Next.js's `process.env`, while the app's actual runtime code reads
+`getCloudflareContext().env`, which `wrangler dev` populates from
+`wrangler.jsonc`'s `vars` and from `.dev.vars`. Both files are gitignored.
+
+`.env.local` — Auth.js:
 
 ```
 AUTH_SECRET=              # required — Auth.js session signing key
 AUTH_TRUST_HOST=true      # required outside a known platform
 AUTH_SECRET_PREVIOUS=     # optional — only set during a secret-rotation window
-TURNSTILE_SECRET_KEY=     # optional — empty disables Turnstile verification
-TURNSTILE_SITEKEY=        # optional — empty hides the Turnstile widget
 ```
+
+`.dev.vars` — local-only secrets for bindings `wrangler dev` reads directly:
+
+```
+TURNSTILE_SECRET_KEY=     # optional — omit to disable Turnstile verification locally
+```
+
+The Turnstile **sitekey** isn't secret, so it lives in `wrangler.jsonc`'s
+committed `vars` instead of either env file, and is used as-is in both local
+dev and production. In production, `TURNSTILE_SECRET_KEY` is set with
+`wrangler secret put TURNSTILE_SECRET_KEY` (encrypted, never in a file).
 
 ### Local D1
 

@@ -7,7 +7,22 @@
 //
 // The relative import below resolves against `.open-next/worker.js`'s own
 // location (standard ES module semantics), so it isn't affected by which
-// file imports it, and stays valid across rebuilds.
+// file imports it, and stays valid across rebuilds. It doesn't exist until
+// OpenNext's build step runs, which happens AFTER `next build`'s own
+// TypeScript check — same reason OpenNext's own generated worker.js
+// annotates its sibling imports the same way, rather than relying on a
+// tsconfig `exclude` (which `next build`'s internal checker doesn't actually
+// honor for this file — confirmed the hard way: it "worked" before only
+// because a leftover `.open-next/worker.js` happened to already exist on
+// disk from a prior build). `@ts-expect-error` doesn't work here either: its
+// validity flips depending on whether `.open-next/worker.js` happens to
+// exist when a check runs, which this repo's own scripts don't keep
+// consistent (`npm run build` alone vs. after `npm run preview`). `@ts-ignore`
+// is state-independent — it does nothing when the line is already
+// error-free — which is what's actually needed for a target that may or may
+// not exist depending on which script ran last.
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment -- see above
+// @ts-ignore: resolved by wrangler/opennextjs-cloudflare build (may not exist yet)
 import openNextWorker from "./.open-next/worker.js";
 import { handleStockDeductionBatch } from "./src/lib/queue/stock-deduction-consumer";
 import type { StockDeductionMessage } from "./src/lib/queue/stock-deduction";
@@ -28,4 +43,6 @@ export default {
 // wrangler.jsonc declares a durable_objects binding pointing at one of
 // these class names. None are declared today, but re-exporting them here
 // keeps this file a drop-in replacement if that changes later.
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment -- see note above
+// @ts-ignore: resolved by wrangler/opennextjs-cloudflare build (may not exist yet)
 export { DOQueueHandler, DOShardedTagCache, BucketCachePurge } from "./.open-next/worker.js";
