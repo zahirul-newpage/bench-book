@@ -14,10 +14,12 @@
 		"enabled": true
 	},
 
-	// Not sensitive — plain vars, not secrets. AUTH_SECRET (the actual
-	// sensitive value) is set separately via `wrangler secret put`.
+	// Not sensitive — plain vars, not secrets. AUTH_SECRET and
+	// TURNSTILE_SECRET_KEY (the actual sensitive values) are set separately
+	// via `wrangler secret put` (production) / `.dev.vars` (local, gitignored).
 	"vars": {
-		"AUTH_TRUST_HOST": "true"
+		"AUTH_TRUST_HOST": "true",
+		"TURNSTILE_SITEKEY": "0x4AAAAAAFDCRCeLS1KirjcO"
 	},
 
 	// Workers AI binding — used by /api/transcribe for Whisper speech-to-text.
